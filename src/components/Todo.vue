@@ -5,6 +5,7 @@ import { ref } from 'vue'
 const todos = ref<string[]>([])
 const description = ref('')
 const inputEditState = ref(false)
+const todoIndex = ref(0)
 
 const trimText = computed(() => description.value.trim())
 
@@ -13,12 +14,13 @@ function validateTodo() {
   return todoExists
 }
 
-function setTodoToEdit(todo: string) {
+function setTodoToEdit(todo: string, index: number): void {
   inputEditState.value = true
   description.value = todo.trim()
+  todoIndex.value = index
 }
 
-function createNewTodo() {
+function createNewTodo(): void {
   const todoIsValid = validateTodo()
 
   if (!trimText.value) {
@@ -27,7 +29,7 @@ function createNewTodo() {
   }
 
   if (todoIsValid) {
-    alert('Já existe um  ToDo com essas informações.')
+    alert('Já existe um ToDo com essas informações.')
     return
   }
 
@@ -35,11 +37,11 @@ function createNewTodo() {
   description.value = ''
 }
 
-function editTodoExisting() {
+function editTodoExisting(): void {
   const todoIsValid = validateTodo()
 
   if (todoIsValid) {
-    alert('Já existe um  ToDo com essas informações.')
+    alert('Já existe um ToDo com essas informações.')
     return
   }
 
@@ -48,22 +50,12 @@ function editTodoExisting() {
     return
   }
 
-  const todoIndex = todos.value.findIndex(todo => todo === trimText.value)
-
-  inputEditState.value = true
-  todos.value.splice(todoIndex, 1, trimText.value)
+  todos.value.splice(todoIndex.value, 1, trimText.value)
   inputEditState.value = false
   description.value = ''
 }
 
-function deleteTodoExisting(todo: string) {
-  const todoIndex = todos.value.findIndex(item => item === todo)
-
-  if (todoIndex < 0) {
-    alert('Não foi possível remover este ToDo.')
-    return
-  }
-
+function deleteTodoExisting(todoIndex: number) {
   todos.value.splice(todoIndex, 1)
   alert('ToDo removido com sucesso.')
 }
@@ -72,11 +64,10 @@ function deleteTodoExisting(todo: string) {
 
 <template>
   <input type="text" v-model="description" @keyup.enter="!inputEditState ? createNewTodo() : editTodoExisting()">
-  {{ todos }}
   <div v-for="(todo, index) in todos" :key="index + todo">
     <h1>{{ todo }}</h1>
-    <button @click="setTodoToEdit(todo)">Editar</button>
-    <button @click="deleteTodoExisting(todo)">Deletar</button>
+    <button @click="setTodoToEdit(todo, index)">Editar</button>
+    <button @click="deleteTodoExisting(index)">Deletar</button>
   </div>
 </template>
 
